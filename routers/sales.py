@@ -35,12 +35,20 @@ def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=List[SaleRead])
 def get_sales(limit: int = Query(10, ge=1), offset: int = Query(0, ge=0), db: Session = Depends(get_db)):
-    sales = db.query(Sale).options(joinedload(Sale.items).joinedload(SaleItem.product)).order_by(Sale.created_at.desc()).limit(limit).offset(offset).all()
+    sales = db.query(Sale).options(
+        joinedload(Sale.items)
+        .joinedload(SaleItem.product)
+        .joinedload(Product.categories)
+    ).order_by(Sale.created_at.desc()).limit(limit).offset(offset).all()
     return sales
 
 @router.get("/{sale_id}", response_model=SaleRead)
 def get_sale(sale_id: int, db: Session = Depends(get_db)):
-    sale = db.query(Sale).options(joinedload(Sale.items).joinedload(SaleItem.product)).filter(Sale.id == sale_id).first()
+    sale = db.query(Sale).options(
+        joinedload(Sale.items)
+        .joinedload(SaleItem.product)
+        .joinedload(Product.categories)
+    ).filter(Sale.id == sale_id).first()
     if not sale:
         raise HTTPException(status_code=404, detail="Продажа не найдена")
     return sale 

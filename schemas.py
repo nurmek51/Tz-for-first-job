@@ -13,10 +13,11 @@ class ProductBase(BaseModel):
     price: float
 
 class ProductCreate(ProductBase):
-    pass
+    category_ids: List[int]
 
 class ProductRead(ProductBase):
     id: int
+    categories: List['CategoryRead']
     class Config:
         orm_mode = True
 
@@ -61,4 +62,7 @@ class CategoryRead(CategoryBase):
 class CategoryWithProducts(CategoryRead):
     products: List[ProductRead]
     class Config:
-        orm_mode = True 
+        orm_mode = True
+
+# Allow forward references
+ProductRead.update_forward_refs() 

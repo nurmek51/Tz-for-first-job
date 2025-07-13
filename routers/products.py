@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import SessionLocal
-from models import Product
-from schemas import ProductRead, ProductCreate
+from models import Product, Category
+from schemas import ProductRead, ProductCreate, CategoryRead
 from typing import List
 
 router = APIRouter()
@@ -16,11 +16,17 @@ def get_db():
 
 @router.get("/", response_model=List[ProductRead])
 def get_products(db: Session = Depends(get_db)):
-    return db.query(Product).all()
+    products = db.query(Product).options(joinedload(Product.categories)).all()
+    return products
 
 @router.post("/", response_model=ProductRead)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = Product(**product.dict())
+    # Validate categories
+    categories = db.query(Category).filter(Category.id.in_(product.category_ids)).all()
+    if len(categories) != len(product.category_ids):
+        raise HTTPException(status_code=400, detail="Некорректный category_id")
+
+    db_product = Product(name=product.name, price=product.price, categories=categories)
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
