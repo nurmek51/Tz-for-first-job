@@ -45,4 +45,20 @@ class SaleRead(BaseModel):
     payment_method: PaymentMethodEnum
     items: List[SaleItemRead]
     class Config:
+        orm_mode = True
+
+class CategoryBase(BaseModel):
+    name: str
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class CategoryRead(CategoryBase):
+    id: int
+    class Config:
+        orm_mode = True
+
+class CategoryWithProducts(CategoryRead):
+    products: List[ProductRead]
+    class Config:
         orm_mode = True 

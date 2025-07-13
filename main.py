@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from database import engine, Base
-from routers import products, sales
+from routers import products, sales, categories
 
 load_dotenv()
 
@@ -23,4 +23,5 @@ def on_startup():
     Base.metadata.create_all(bind=engine)
 
 app.include_router(products.router, prefix="/products", tags=["Products"])
-app.include_router(sales.router, prefix="/sales", tags=["Sales"]) 
+app.include_router(sales.router, prefix="/sales", tags=["Sales"])
+app.include_router(categories.router, prefix="/categories", tags=["Categories"]) 

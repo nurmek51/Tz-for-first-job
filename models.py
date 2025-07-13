@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
@@ -9,11 +9,28 @@ class PaymentMethodEnum(str, enum.Enum):
     card = "card"
     mobile = "mobile"
 
+# Association table between categories and products
+category_product = Table(
+    "category_product",
+    Base.metadata,
+    Column("category_id", Integer, ForeignKey("categories.id"), primary_key=True),
+    Column("product_id", Integer, ForeignKey("products.id"), primary_key=True)
+)
+
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    # Relationship to products (many-to-many)
+    products = relationship("Product", secondary=category_product, back_populates="categories")
+
 class Product(Base):
     __tablename__ = "products"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     price = Column(Float, nullable=False)
+    # Products can belong to one or many categories
+    categories = relationship("Category", secondary=category_product, back_populates="products")
 
 class Sale(Base):
     __tablename__ = "sales"
